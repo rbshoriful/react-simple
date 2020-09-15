@@ -1,13 +1,22 @@
 import React, { useState, useEffect } from 'react';
-import { getDatabaseCart, removeFromDatabaseCart } from '../../utilities/databaseManager';
+import { getDatabaseCart, processOrder, removeFromDatabaseCart } from '../../utilities/databaseManager';
 import fakeData from '../../fakeData';
 import ReviewItem from '../ReviewItem/ReviewItem';
+import Cart from '../Cart/Cart';
+import happyImage from '../../images/giphy.gif';
 
 const Review = () => {
     const [cart, setCart] = useState([]);
+    const [orderPlace, setOrderPlace] = useState([]);
+
+    const handlePlaceOrder = () => {
+        setCart([]);
+        setOrderPlace(true);
+        processOrder();
+    }
 
     const removeProduct = (productKey) => {
-        // console.log("remove click", productKey);
+    //     // console.log("remove click", productKey);
         const newCart = cart.filter(pd => pd.key !== productKey);
         setCart(newCart);
         removeFromDatabaseCart(productKey);
@@ -16,7 +25,7 @@ const Review = () => {
     useEffect(() => {
         // cart
         const saveCart = getDatabaseCart();
-        // console.log(saveCart);
+        // // console.log(saveCart);
         const productKeys = Object.keys(saveCart);
 
         const cartProducts = productKeys.map( key => {
@@ -28,15 +37,27 @@ const Review = () => {
         setCart(cartProducts);
     }, []);
 
+    let thankYou;
+    if(orderPlace){
+        thankYou = <img src={happyImage} alt=""/>
+    }
     return (
-        <div>
-            <h2>Cart Items:{cart.length}</h2>
-            {
-                cart.map(pd => <ReviewItem 
-                    key={pd.key}
-                    removeProduct={removeProduct}
-                    product={pd}></ReviewItem>)
-            }
+        <div className="twin-container">
+            <div className="product-container">
+                {
+                    cart.map(pd => <ReviewItem 
+                        key={pd.key}
+                        removeProduct={removeProduct}
+                        product={pd}></ReviewItem>)
+                }
+                { thankYou }
+            </div>
+            <div>
+                <Cart cart={cart}>
+                    <button onClick={handlePlaceOrder} className="main-btn">Place Order</button>
+                </Cart>
+            </div>
+            
         </div>
     );
 };
